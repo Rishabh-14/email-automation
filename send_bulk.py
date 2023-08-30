@@ -1,36 +1,51 @@
-import smtplib
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+from googleapiclient.discovery import build
+import base64
 from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
-# SMTP configuration
-smtp_server = 'smtp.gmail.com'
-smtp_port = 587  # For TLS
-email = 'rishabhkharyal3@gmail.com'  # Replace with your email
-password = 'Srikrishna@13'  # Replace with your password
+# If modifying these SCOPES, delete the file token.json.
+SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
-# Email details
-subject = 'Hello, this is a test email'
-body = 'This is the body of the email.'
-recipients = ['rishabhkharyal@gmail.com', 'sanjeevkharyal4@gmail.com']  # Replace with actual email addresses
+def get_credentials():
+    """Get valid user credentials from storage."""
+    creds = None
+    # TODO: Load your credentials from the 'token.json' file if it exists.
+    # If it doesn't exist or if the token is invalid, run the OAuth2 flow to obtain new credentials.
+    return creds
 
-# Create server object with SSL option
-server = smtplib.SMTP(smtp_server, smtp_port)
-server.starttls()  # Start TLS encryption
+def create_message(sender, to, subject, message_text):
+    """Create a message for an email."""
+    message = MIMEText(message_text)
+    message['to'] = to
+    message['from'] = sender
+    message['subject'] = subject
+    raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+    return {'raw': raw_message}
 
-# Login to email
-server.login(email, password)
+def send_message(service, user_id, message):
+    """Send an email message."""
+    try:
+        message = (service.users().messages().send(userId=user_id, body=message).execute())
+        print(f"Message Id: {message['id']}")
+        return message
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        return None
 
-# Loop through each recipient
-for recipient in recipients:
-    # Create the email
-    msg = MIMEMultipart()
-    msg['From'] = email
-    msg['To'] = recipient
-    msg['Subject'] = subject
-    msg.attach(MIMEText(body, 'plain'))
+def main():
+    """Shows basic usage of the Gmail API."""
+    creds = get_credentials()
+    service = build('gmail', 'v1', credentials=creds)
 
-    # Send the email
-    server.sendmail(email, recipient, msg.as_string())
+    # Call the Gmail API to send email
+    sender = "your_email@gmail.com"
+    to = "recipient_email@gmail.com"
+    subject = "Your Subject Here"
+    message_text = "Your Message Here"
+    message = create_message(sender, to, subject, message_text)
+    send_message(service, "me", message)
 
-# Quit the server
-server.quit()
+if __name__ == '__main__':
+    main()
