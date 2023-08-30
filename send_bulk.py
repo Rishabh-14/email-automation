@@ -6,7 +6,7 @@ from email.mime.multipart import MIMEMultipart
 smtp_server = 'smtp.gmail.com'
 smtp_port = 587  # For TLS
 email = 'rishabhkharyal3@gmail.com'  # Replace with your email
-password = 'Sanjeev@13'  # Replace with your password
+password = 'Srikrishna@13'  # Replace with your password
 
 # Email details
 subject = 'Hello, this is a test email'
